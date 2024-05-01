@@ -21,10 +21,11 @@
 #include <QProcess>
 #include <QTranslator>
 #include <QFile>
+#include <QFileDialog>
 
 #include "canvaswin.h"
 
-const QString version = "1.0.0";
+const QString version = "1.0.1";
 
 
 QT_BEGIN_NAMESPACE

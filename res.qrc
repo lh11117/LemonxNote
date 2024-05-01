@@ -10,5 +10,6 @@
         <file>undo.png</file>
         <file>languages/langChinese.qm</file>
         <file>languages/langEnglish.qm</file>
+        <file>file.png</file>
     </qresource>
 </RCC>

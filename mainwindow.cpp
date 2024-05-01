@@ -126,15 +126,38 @@ MainWindow::MainWindow(QWidget* parent)
     });
 
     connect(ui->quitButton, &QPushButton::clicked, [&] {
-            QMessageBox message(QMessageBox::Question, tr("Tip"), tr("Are you certain you wish to exit?"),QMessageBox::Yes | QMessageBox::No,this);
-            message.setDefaultButton(QMessageBox::No);
+        if (cw->pages != Pages{{}}){
+            QMessageBox message(QMessageBox::Question, tr("Tip"), tr("Are you certain you wish to exit?") + "\n" + tr("Do you want to save the blackboard file?"),QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,this);
+            message.setDefaultButton(QMessageBox::Cancel);
             message.button(QMessageBox::Yes)->setText(tr("Yes"));
             message.button(QMessageBox::No)->setText(tr("No"));
+            message.button(QMessageBox::Cancel)->setText(tr("Cancel"));
             // ////////////////////
-            if (message.exec() == QMessageBox::Yes) {
+            int result = message.exec();
+            switch(result){
+            case QMessageBox::Yes: {
+                QFileDialog fileDialog;
+                QString path = fileDialog.getSaveFileName(this, tr("Save To"), ".", tr("LemonxNote Blackboard File") + "(*.lnbf)");
+                if (path=="") { return; }
+                QFile file(path); // 指定要写入的文件名
+                if (file.open(QIODevice::WriteOnly)) {
+                    QDataStream out(&file); // 创建数据流对象
+                    out << cw->pages; // 序列化到文件中
+                    file.close();
+                } else {
+                    // 错误处理
+                }
+            }
+            case QMessageBox::No: {
                 this->cw->close();
                 this->close();
+                break;
             }
+            }
+        } else {
+            this->cw->close();
+            this->close();
+        }
         });
 
     connect(ui->next_page, &QPushButton::clicked, [&]{
@@ -154,13 +177,13 @@ MainWindow::MainWindow(QWidget* parent)
     });
 
     connect(ui->back_page, &QPushButton::clicked, [&]{
-        cw->history<<QPair<int, Pages>{cw->page,cw->pages};
-        emit cw->OnDrawCompleted();
         if(cw->page!=0) {      // 直接上一页
+            cw->history<<QPair<int, Pages>{cw->page,cw->pages};
+            emit cw->OnDrawCompleted();
             cw->setPage(cw->page-1);
             OnPageChanges();
+            qDebug()<<"Page: "<<cw->page<<", Total Page: "<<cw->pages.size();
         }
-        qDebug()<<"Page: "<<cw->page<<", Total Page: "<<cw->pages.size();
     });
 
     connect(ui->undo, &QPushButton::clicked, [&]{
@@ -173,6 +196,40 @@ MainWindow::MainWindow(QWidget* parent)
             OnPageChanges();
             OnDrawCompleted();
         }
+    });
+
+    connect(ui->open_file, &QPushButton::clicked, [&]{
+        QString file_name = QFileDialog::getOpenFileName(this, tr("Selete File"), ".", tr("LemonxNote Blackboard File")+"(*.lnbf)");
+        if (file_name=="") { return; }
+        if (cw->pages != Pages{{}}) {
+            // Ask the user
+            QMessageBox message(QMessageBox::Question, tr("Tip"), tr("If you open the file, this blackboard will be lost!"),QMessageBox::Yes | QMessageBox::No,this);
+            message.setDefaultButton(QMessageBox::Cancel);
+            message.button(QMessageBox::Yes)->setText(tr("Still"));
+            message.button(QMessageBox::No)->setText(tr("Cancel"));
+            int result = message.exec();
+            if (result == QMessageBox::No) { return; }
+        }
+        QFile file(file_name);
+        if (file.open(QIODevice::ReadOnly)) {
+            try{
+                QDataStream in(&file);
+                in >> cw->pages;
+            } catch(char*err) {
+                QMessageBox::critical(this, tr("Error"), tr("This file was broken!"));
+                file.close();
+                return;
+            }
+        } else {
+            // 错误处理
+            QMessageBox::critical(this, tr("Error"), tr("Couldn't open the file!"));
+            file.close();
+            return;
+        }
+        cw->history = {};
+        cw->update();
+        OnPageChanges();
+        OnDrawCompleted();
     });
 
     cw->show();
@@ -344,6 +401,7 @@ void MainWindow::InitIcons(){
     ui->back_page->setIcon(QIcon(":/back_page.png"));
     ui->quitButton->setIcon(QIcon(":/quit.png"));
     ui->undo->setIcon(QIcon(":/undo.png"));
+    ui->open_file->setIcon(QIcon(":/file.png"));
     QString qss = "background-color: rgba(0, 0, 0, 50);"
             "border-radius: 35px;"
             "padding: 5px;";
@@ -354,10 +412,12 @@ void MainWindow::InitIcons(){
     ui->next_page->setStyleSheet(qss);
     ui->back_page->setStyleSheet(qss);
     ui->undo->setStyleSheet(qss);
+    ui->open_file->setStyleSheet(qss);
     ui->page->setStyleSheet(qss + "color: #fff; font: 15pt \"Consolas\";");
     //tintButtonBackground(ui->next_page, QColor(COLOR, COLOR, COLOR), QSize(35, 35));
     //tintButtonBackground(ui->back_page, QColor(COLOR, COLOR, COLOR, 30), QSize(35, 35));
     tintButtonBackground(ui->quitButton, QColor(255, 0, 0), QSize(25,25));
+    tintButtonBackground(ui->open_file, QColor(COLOR, COLOR, COLOR), QSize(30,30));
     OnPageChanges();
     OnDrawCompleted();
 }

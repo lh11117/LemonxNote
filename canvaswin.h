@@ -33,7 +33,7 @@ public:
 
     QColor drawColor = QColor(255,0,0);
 
-    Pages pages = {{QPoint(0,0),{{QColor(255,0,0),QList<QPoint>{}}}}};
+    Pages pages = {{}};
 
     QList<QPair<int/* 这个int表示页码 */, Pages>> history = {};
 
