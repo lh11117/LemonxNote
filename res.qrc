@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/">
+        <file>eraser.png</file>
+        <file>pen.png</file>
+        <file>point.png</file>
+        <file>quit.png</file>
+        <file>back_page.png</file>
+        <file>next_page.png</file>
+        <file>new_page.png</file>
+        <file>undo.png</file>
+        <file>languages/langChinese.qm</file>
+        <file>languages/langEnglish.qm</file>
+    </qresource>
+</RCC>
