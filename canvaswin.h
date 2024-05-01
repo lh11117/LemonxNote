@@ -84,6 +84,7 @@ private:
 signals:
     void setToolBarPostion(int);
     void OnDrawCompleted();
+    void OnUpdateHistory();
 };
 
 #endif // CANVASWIN_H

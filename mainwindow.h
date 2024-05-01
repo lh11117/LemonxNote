@@ -25,7 +25,7 @@
 
 #include "canvaswin.h"
 
-const QString version = "1.0.1";
+const QString version = "1.0.2";
 
 
 QT_BEGIN_NAMESPACE
@@ -53,6 +53,8 @@ public:
 
     QNetworkAccessManager *nam = new QNetworkAccessManager(this);
     QNetworkAccessManager *dl_nam = new QNetworkAccessManager(this);
+
+    QString lnbf_path = "";
 
 
 private:

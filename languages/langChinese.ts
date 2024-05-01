@@ -55,13 +55,13 @@
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="129"/>
-        <source>Are you certain you wish to exit?</source>
-        <translation>你确定你要退出吗?</translation>
+        <source>You will exit!</source>
+        <translation>你将会退出!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="129"/>
-        <source>Do you want to save the blackboard file?</source>
-        <translation>你想保存板书文件吗?</translation>
+        <source>Before that, would you like to save the blackboard file?</source>
+        <translation>在那之前, 你想保存板书文件吗?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="131"/>

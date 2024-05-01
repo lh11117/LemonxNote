@@ -39,124 +39,17 @@
        </item>
        <item row="1" column="0">
         <layout class="QGridLayout" name="gridLayout">
-         <item row="12" column="0">
-          <widget class="Line" name="line_2">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="Line" name="line_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QPushButton" name="eraser">
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>70</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>70</width>
-             <height>70</height>
-            </size>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background-color: rgba(255, 255, 255, 0);
-border: none;</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="0">
+         <item row="7" column="0">
           <widget class="Line" name="line">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
           </widget>
          </item>
-         <item row="11" column="0">
-          <widget class="QPushButton" name="next_page">
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>70</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>70</width>
-             <height>70</height>
-            </size>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background-color: rgba(255, 255, 255, 0);
-border: none;</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset resource="res.qrc">
-             <normaloff>:/new_page.png</normaloff>:/new_page.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QPushButton" name="pen">
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>70</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>70</width>
-             <height>70</height>
-            </size>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background-color: rgba(255, 255, 255, 0);
-border: none;</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="0">
-          <widget class="QPushButton" name="back_page">
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>70</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>70</width>
-             <height>70</height>
-            </size>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background-color: rgba(255, 255, 255, 0);
-border: none;</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset resource="res.qrc">
-             <normaloff>:/back_page.png</normaloff>:/back_page.png</iconset>
+         <item row="13" column="0">
+          <widget class="Line" name="line_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
            </property>
           </widget>
          </item>
@@ -206,7 +99,41 @@ border: none;</string>
            </property>
           </widget>
          </item>
-         <item row="13" column="0">
+         <item row="3" column="0">
+          <widget class="Line" name="line_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="0">
+          <widget class="QPushButton" name="back_page">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>70</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>70</width>
+             <height>70</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color: rgba(255, 255, 255, 0);
+border: none;</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="res.qrc">
+             <normaloff>:/back_page.png</normaloff>:/back_page.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="14" column="0">
           <widget class="QPushButton" name="quitButton">
            <property name="minimumSize">
             <size>
@@ -233,7 +160,30 @@ padding: 5px;</string>
            </property>
           </widget>
          </item>
-         <item row="9" column="0">
+         <item row="2" column="0">
+          <widget class="QPushButton" name="eraser">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>70</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>70</width>
+             <height>70</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color: rgba(255, 255, 255, 0);
+border: none;</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="0">
           <widget class="QPushButton" name="page">
            <property name="minimumSize">
             <size>
@@ -253,6 +203,79 @@ border: none;</string>
            </property>
            <property name="text">
             <string>1/1</string>
+           </property>
+          </widget>
+         </item>
+         <item row="12" column="0">
+          <widget class="QPushButton" name="next_page">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>70</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>70</width>
+             <height>70</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color: rgba(255, 255, 255, 0);
+border: none;</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="res.qrc">
+             <normaloff>:/new_page.png</normaloff>:/new_page.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QPushButton" name="save_file">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>70</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>70</width>
+             <height>70</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color: rgba(255, 255, 255, 0);
+border: none;</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QPushButton" name="pen">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>70</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>70</width>
+             <height>70</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color: rgba(255, 255, 255, 0);
+border: none;</string>
+           </property>
+           <property name="text">
+            <string/>
            </property>
           </widget>
          </item>

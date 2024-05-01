@@ -82,7 +82,7 @@ QString format_bytes(qint64 size_bytes){
 void CanvasWin::SetTime(){
     QDateTime dateTime= QDateTime::currentDateTime();//获取系统当前的时间
     QString timeStr = dateTime.toString("hh:mm:ss");//格式化时间
-    ui->labelTime->setText(QString("%5  %4   %1   %2   %3").arg(history.size()).arg(format_bytes(getPagesSize())).arg(timeStr).arg(QSslSocket::supportsSsl()).arg(zoom));
+    ui->labelTime->setText(QString("%3   %1   %2").arg(format_bytes(getPagesSize())).arg(timeStr).arg(QSslSocket::supportsSsl()));
     ui->labelTime->adjustSize();
     ui->labelTime->move(width()-ui->labelTime->width()-10,10);
 }
@@ -187,7 +187,7 @@ void CanvasWin::Clean(QPoint last, QPoint p){
 void CanvasWin::mousePressEvent(QMouseEvent *event) {
     PressMouse = true;
     history<<QPair<int, Pages>{page,pages};
-    emit OnDrawCompleted();
+    emit OnUpdateHistory();
     mousePos = event->pos()/(Mode==0?zoom:1) - pages.at(page).first;
     if (event->button() == Qt::LeftButton && Mode==1) {
         QList<QPair<QColor, QList<QPoint>>> _page = pages.at(page).second; // 获取
@@ -201,7 +201,7 @@ void CanvasWin::mousePressEvent(QMouseEvent *event) {
 }
 
 void CanvasWin::mouseMoveEvent(QMouseEvent *event) {
-    emit this->setToolBarPostion(event->x()>width()/2?2:1);
+    emit this->setToolBarPostion(event->x()<width()*1/6?1:(event->x()>width()*5/6?2:0));
     if (Mode==1 && event->buttons() & Qt::LeftButton) {
         QList<QPair<QColor, QList<QPoint>>> _page = pages.at(page).second; // 获取页面
         _page.last().second << event->pos()/zoom - pages.at(page).first; // 这个页面最后一个线条, 新增点的记录
@@ -227,6 +227,7 @@ void CanvasWin::mouseReleaseEvent(QMouseEvent *event){
         _page << QPair<QColor, QList<QPoint>>{drawColor,QList<QPoint>()};
         pages.replace(page, {pages.at(page).first, _page});
     }
+    emit OnDrawCompleted();
     PressMouse = false;
     eraserR = 0;
     update(); // 请求重绘
