@@ -77,12 +77,13 @@ QString format_bytes(qint64 size_bytes){
             return QString("%1%2").arg(QString::number(size, 'f', 5)).arg(unit);
         size /= 1024.0;
     }
+    return "";
 }
 
 void CanvasWin::SetTime(){
     QDateTime dateTime= QDateTime::currentDateTime();//获取系统当前的时间
     QString timeStr = dateTime.toString("hh:mm:ss");//格式化时间
-    ui->labelTime->setText(QString("%3   %1   %2").arg(format_bytes(getPagesSize())).arg(timeStr).arg(QSslSocket::supportsSsl()));
+    ui->labelTime->setText(QString("%1   %2").arg(format_bytes(getPagesSize())).arg(timeStr));
     ui->labelTime->adjustSize();
     ui->labelTime->move(width()-ui->labelTime->width()-10,10);
 }

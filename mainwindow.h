@@ -22,10 +22,12 @@
 #include <QTranslator>
 #include <QFile>
 #include <QFileDialog>
-
+#include "save_open_lnbf.h"
 #include "canvaswin.h"
-
-const QString version = "1.0.2";
+#include <QSaveFile>
+#include "appinfo.h"
+#include <QCheckBox>
+#include <QStyle>
 
 
 QT_BEGIN_NAMESPACE

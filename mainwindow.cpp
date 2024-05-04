@@ -71,6 +71,7 @@ void tintButtonBackground(QPushButton *button, const QColor &color, const QSize 
 }
 
 
+
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -127,14 +128,15 @@ MainWindow::MainWindow(QWidget* parent)
     });
 
     connect(ui->quitButton, &QPushButton::clicked, [&] {
-        if (lnbf_path != "") {
-            QFile file(lnbf_path);
+        if (lnbf_path != "") {QFile file(lnbf_path);
             file.open(QIODevice::ReadOnly);
-            QDataStream in(&file);
+            QTextStream in(&file);
+            QString data;
+            in>>data;
             Pages p;
-            in >> p;
+            SAVE_OPEN_LNBF::load(data, p);
             if (p != cw->pages) {
-                QMessageBox message(QMessageBox::Question, tr("Tip"), tr("Are you certain you wish to exit?") + "\n" + tr("Do you want to save the blackboard file?"),QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,this);
+                QMessageBox message(QMessageBox::Question, tr("Tip"), tr("You will exit!") + "\n" + tr("Before that, would you like to save the blackboard file?"),QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,this);
                 message.setDefaultButton(QMessageBox::Cancel);
                 message.button(QMessageBox::Yes)->setText(tr("Yes"));
                 message.button(QMessageBox::No)->setText(tr("No"));
@@ -145,8 +147,8 @@ MainWindow::MainWindow(QWidget* parent)
                 case QMessageBox::Yes: {
                     QFile file(lnbf_path); // 指定要写入的文件名
                     if (file.open(QIODevice::WriteOnly)) {
-                        QDataStream out(&file); // 创建数据流对象
-                        out << cw->pages; // 序列化到文件中
+                        QTextStream out(&file); // 创建数据流对象
+                        out << SAVE_OPEN_LNBF::save(cw->pages).toLocal8Bit(); // 序列化到文件中
                         file.close();
                     } else {
                         // 错误处理
@@ -177,8 +179,7 @@ MainWindow::MainWindow(QWidget* parent)
                 if (path=="") { return; }
                 QFile file(path); // 指定要写入的文件名
                 if (file.open(QIODevice::WriteOnly)) {
-                    QDataStream out(&file); // 创建数据流对象
-                    out << cw->pages; // 序列化到文件中
+                    file.write(SAVE_OPEN_LNBF::save(cw->pages).toLocal8Bit());
                     file.close();
                 } else {
                     // 错误处理
@@ -249,8 +250,12 @@ MainWindow::MainWindow(QWidget* parent)
         QFile file(file_name);
         if (file.open(QIODevice::ReadOnly)) {
             try{
-                QDataStream in(&file);
-                in >> cw->pages;
+                QTextStream in(&file);
+                QString data;
+                in>>data;
+                qDebug()<<data;
+                cw->page = 0;
+                SAVE_OPEN_LNBF::load(data, cw->pages);
             } catch(char*err) {
                 QMessageBox::critical(this, tr("Error"), tr("This file was broken!"));
                 file.close();
@@ -271,11 +276,10 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(ui->save_file, &QPushButton::clicked, [&]{
         if (lnbf_path != "") {
-            QFile file(lnbf_path); // 指定要写入的文件名
-            if (file.open(QIODevice::WriteOnly)) {
-                QDataStream out(&file); // 创建数据流对象
-                out << cw->pages; // 序列化到文件中
-                file.close();
+            QFile File(lnbf_path); // 指定要写入的文件名
+            if (File.open(QIODevice::WriteOnly)) {
+                File.write(SAVE_OPEN_LNBF::save(cw->pages).toLocal8Bit());
+                File.close();
                 OnDrawCompleted();
             } else {
                 // 错误处理
@@ -284,17 +288,41 @@ MainWindow::MainWindow(QWidget* parent)
             QFileDialog fileDialog;
             QString path = fileDialog.getSaveFileName(this, tr("Save To"), ".", tr("LemonxNote Blackboard File") + "(*.lnbf)");
             if (path=="") { return; }
-            QFile file(path); // 指定要写入的文件名
-            if (file.open(QIODevice::WriteOnly)) {
-                QDataStream out(&file); // 创建数据流对象
-                out << cw->pages; // 序列化到文件中
-                file.close();
-                lnbf_path = path;
-                OnDrawCompleted();
-            } else {
-                // 错误处理
-            }
+            QFile File(path);
+            File.open(QFile::WriteOnly|QFile::Truncate);
+            File.write(SAVE_OPEN_LNBF::save(cw->pages).toLocal8Bit());
+            File.close();
+            lnbf_path = path;
+            OnDrawCompleted();
         }
+    });
+
+    connect(ui->settingButton, &QPushButton::clicked, [&]{
+        QMessageBox *msg = new QMessageBox(this);
+        msg->setStandardButtons(QMessageBox::Ok);
+        msg->setIcon(QMessageBox::Information);
+        msg->setWindowTitle(tr("About"));
+        msg->setText(QString(tr("LemonxNote Version: ") + "v%1\n" +
+                             tr("Is Qt supported by OpenSSL? ") + " %2\n" +
+                             tr("Required OpenSSL version: ") + "%3\n" +
+                             tr("Memory footprint: ") + "%4").arg(version)
+                                                             .arg(QSslSocket::supportsSsl())
+                                                             .arg(QSslSocket::sslLibraryBuildVersionString())
+                                                             .arg(format_bytes(cw->getPagesSize())));
+        msg->button(QMessageBox::Ok)->setText(tr("Yes"));
+        QCheckBox *cb = new QCheckBox(msg);
+        cb->setCheckState(Qt::Unchecked);
+        cb->setText(tr("About") + " Qt");
+        cb->setIcon(QApplication::style()->standardIcon(QStyle::SP_TitleBarMenuButton));
+        cb->setStyleSheet("QCheckBox{padding-left:-16px;}QCheckBox::indicator:unchecked{image:null;}QCheckBox::indicator:checked{image: null;}");
+        connect(cb, &QCheckBox::clicked, [&]{
+            msg->setWindowOpacity(0);
+            cb->setCheckState(Qt::Unchecked);
+            QMessageBox::aboutQt(msg, "关于 Qt");
+            msg->setWindowOpacity(1);
+        });
+        msg->setCheckBox(cb);
+        msg->exec();
     });
 
     cw->show();
@@ -311,6 +339,7 @@ MainWindow::MainWindow(QWidget* parent)
     translator->load(":/languages/langChinese.qm");
     qApp->installTranslator(translator);
 };
+
 
 
 
@@ -408,6 +437,7 @@ void MainWindow::onSetToolbarPositon(int left_or_right){
 }
 
 void MainWindow::OnDrawCompleted(){
+    cw->update();
     //qDebug()<<"Page histories: "<<cw->history.size();
     ui->undo->setIcon(QIcon(":/undo.png"));
     ui->save_file->setIcon(QIcon(":/save.png"));
@@ -430,9 +460,11 @@ void MainWindow::OnDrawCompleted(){
     } else {
         QFile file(lnbf_path);
         file.open(QIODevice::ReadOnly);
-        QDataStream in(&file);
+        QTextStream in(&file);
+        QString data;
+        in>>data;
         Pages p;
-        in >> p;
+        SAVE_OPEN_LNBF::load(data, p);
         if (p == cw->pages) {
             tintButtonBackground(ui->save_file, QColor(COLOR, COLOR, COLOR, 30), QSize(30,30));
         } else {
@@ -487,6 +519,7 @@ void MainWindow::InitIcons(){
     ui->undo->setIcon(QIcon(":/undo.png"));
     ui->open_file->setIcon(QIcon(":/file.png"));
     ui->save_file->setIcon(QIcon(":/save.png"));
+    ui->settingButton->setIcon(QIcon(":/setting.png"));
     QString qss = "background-color: rgba(0, 0, 0, 50);"
             "border-radius: 35px;"
             "padding: 5px;";
@@ -499,12 +532,14 @@ void MainWindow::InitIcons(){
     ui->undo->setStyleSheet(qss);
     ui->open_file->setStyleSheet(qss);
     ui->save_file->setStyleSheet(qss);
+    ui->settingButton->setStyleSheet(qss);
     ui->page->setStyleSheet(qss + "color: #fff; font: 15pt \"Consolas\";");
     //tintButtonBackground(ui->next_page, QColor(COLOR, COLOR, COLOR), QSize(35, 35));
     //tintButtonBackground(ui->back_page, QColor(COLOR, COLOR, COLOR, 30), QSize(35, 35));
     tintButtonBackground(ui->quitButton, QColor(255, 0, 0), QSize(25,25));
     tintButtonBackground(ui->open_file, QColor(COLOR, COLOR, COLOR), QSize(30,30));
     tintButtonBackground(ui->save_file, QColor(COLOR, COLOR, COLOR, 30), QSize(30,30));
+    tintButtonBackground(ui->settingButton, QColor(COLOR, COLOR, COLOR), QSize(30,30));
     OnPageChanges();
     OnDrawCompleted();
 }

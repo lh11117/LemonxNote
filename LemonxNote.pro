@@ -19,12 +19,15 @@ SOURCES += \
     canvaswin.cpp \
     dialogclean.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    save_open_lnbf.cpp
 
 HEADERS += \
+    appinfo.h \
     canvaswin.h \
     dialogclean.h \
-    mainwindow.h
+    mainwindow.h \
+    save_open_lnbf.h
 
 FORMS += \
     canvaswin.ui \
@@ -54,3 +57,6 @@ DISTFILES += \
     res.rc
 
 RC_ICONS = "lemonxnote.ico"
+
+
+QT+=xml

@@ -14,8 +14,11 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
+#include "appinfo.h"
 
 typedef QList<QPair<QPoint, /* <-偏移量, 即offset */QList/* 每一个线条 */<QPair<QColor/* <-绘图颜色 */, QList<QPoint> /* 线里面的每个点坐标 */>>>> Pages;
+
+QString format_bytes(qint64 size_bytes);
 
 namespace Ui {
 class CanvasWin;
@@ -47,6 +50,8 @@ public:
 
     float zoom = 1;
 
+    qint64 getPagesSize();
+
 private:
     Ui::CanvasWin *ui;
 
@@ -59,7 +64,6 @@ private:
     bool timerInited = false;
 
     void SetTime();
-    qint64 getPagesSize();
 
 
 protected:

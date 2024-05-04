@@ -118,5 +118,30 @@
         <source>Couldn't open the file!</source>
         <translation>无法打开文件!</translation>
     </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="349"/>
+        <source>LemonxNote Version: </source>
+        <translation>白板版本: </translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="349"/>
+        <source>Is Qt supported by OpenSSL? </source>
+        <translation>是否支持OpenSSL: </translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="349"/>
+        <source>Required OpenSSL version: </source>
+        <translation>需要的OpenSSL版本: </translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="349"/>
+        <source>Memory footprint: </source>
+        <translation>板书内存占用: </translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="348"/>
+        <source>About</source>
+        <translation>关于</translation>
+    </message>
 </context>
 </TS>
