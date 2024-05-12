@@ -72,13 +72,14 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
     void wheelEvent(QWheelEvent *event) override {
+        pages.replace(page, {pages.at(page).first-QPoint(event->x()*(zoom-1), event->y()*(zoom-1)), pages.at(page).second});
         if(event->delta()>0){
             zoom += 0.1;
         } else {
             zoom -= 0.1;
         }
-pages.replace(page, {pages.at(page).first+QPoint(event->x()*(zoom-1), event->y()*(zoom-1)), pages.at(page).second});
-update();
+        pages.replace(page, {pages.at(page).first+QPoint(event->x()*(zoom-1), event->y()*(zoom-1)), pages.at(page).second});
+        update();
     };
 
 public slots:

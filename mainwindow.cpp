@@ -12,66 +12,6 @@ const int COLOR = 255;
 const int ALPHA = 100;
 
 
-int compareVersions(const QString& v1, const QString& v2)
-{
-    /* 比较版本号 */
-    QVersionNumber version1 = QVersionNumber::fromString(v1);
-    QVersionNumber version2 = QVersionNumber::fromString(v2);
-
-    // 首先比较主版本号
-    if (version1.majorVersion() < version2.majorVersion())
-        return -1;
-    else if (version1.majorVersion() > version2.majorVersion())
-        return 1;
-
-    // 如果主版本号相同，则比较次版本号
-    if (version1.minorVersion() < version2.minorVersion())
-        return -1;
-    else if (version1.minorVersion() > version2.minorVersion())
-        return 1;
-
-    // 如果次版本号也相同，则比较补丁版本号
-    if (version1.microVersion() < version2.microVersion())
-        return -1;
-    else if (version1.microVersion() > version2.microVersion())
-        return 1;
-
-    return 0; // 版本号完全相同
-}
-
-
-void tintButtonBackground(QPushButton *button, const QColor &color, const QSize &padding = QSize(20,20))
-{
-    if (!button) return;
-
-    // 获取按钮的尺寸
-    QSize buttonSize = button->size();
-
-    // 加载按钮当前的图标（如果有的话）到QPixmap
-    QIcon buttonIcon = button->icon();
-    QPixmap pixmap = buttonIcon.pixmap(buttonSize);
-
-    if (pixmap.isNull()) {
-        return;
-    }
-
-    // 使用 QPainter 对象来修改pixmap，首先按比例缩放且保持图像质量
-    QPixmap scaledPixmap = pixmap.scaled(buttonSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-
-    QPainter painter(&scaledPixmap);
-    painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
-    painter.fillRect(scaledPixmap.rect(), color);
-    painter.end();
-
-    // 将着色且按比例缩放后的图片设置为按钮的图标
-    QIcon coloredIcon(scaledPixmap);
-    button->setIcon(coloredIcon);
-    button->setIconSize(buttonSize - padding); // 确保图标大小与按钮匹配，尽管按比例缩放，但仍设置以覆盖所有情况
-
-}
-
-
-
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -253,7 +193,7 @@ MainWindow::MainWindow(QWidget* parent)
                 QTextStream in(&file);
                 QString data;
                 in>>data;
-                qDebug()<<data;
+                //qDebug()<<data;
                 cw->page = 0;
                 SAVE_OPEN_LNBF::load(data, cw->pages);
             } catch(char*err) {
@@ -299,7 +239,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(ui->settingButton, &QPushButton::clicked, [&]{
         QMessageBox *msg = new QMessageBox(this);
-        msg->setStandardButtons(QMessageBox::Ok);
+        msg->setStandardButtons(QMessageBox::Ok | QMessageBox::Yes);
         msg->setIcon(QMessageBox::Information);
         msg->setWindowTitle(tr("About"));
         msg->setText(QString(tr("LemonxNote Version: ") + "v%1\n" +
@@ -309,20 +249,42 @@ MainWindow::MainWindow(QWidget* parent)
                                                              .arg(QSslSocket::supportsSsl())
                                                              .arg(QSslSocket::sslLibraryBuildVersionString())
                                                              .arg(format_bytes(cw->getPagesSize())));
-        msg->button(QMessageBox::Ok)->setText(tr("Yes"));
+        msg->button(QMessageBox::Yes)->setText(tr("Yes"));
+        msg->button(QMessageBox::Ok)->setText("  " + tr("Set Language") + "  ");
         QCheckBox *cb = new QCheckBox(msg);
         cb->setCheckState(Qt::Unchecked);
         cb->setText(tr("About") + " Qt");
         cb->setIcon(QApplication::style()->standardIcon(QStyle::SP_TitleBarMenuButton));
-        cb->setStyleSheet("QCheckBox{padding-left:-16px;}QCheckBox::indicator:unchecked{image:null;}QCheckBox::indicator:checked{image: null;}");
+        cb->setStyleSheet("QCheckBox{padding-left:-16px;}QCheckBox::indicator:unchecked{image:null;}QCheckBox::indicator:checked{image:null;}");
         connect(cb, &QCheckBox::clicked, [&]{
             msg->setWindowOpacity(0);
             cb->setCheckState(Qt::Unchecked);
-            QMessageBox::aboutQt(msg, "关于 Qt");
+            QMessageBox::aboutQt(msg, tr("About") + " Qt");
             msg->setWindowOpacity(1);
         });
         msg->setCheckBox(cb);
-        msg->exec();
+        if (msg->exec()==QMessageBox::Ok) {
+            // Languages
+            QDialog *dialog=new QDialog(this);
+            //当主窗口不关闭，即不进行析构时，多次打开关闭对话框会导致内存泄漏
+            dialog->setAttribute(Qt::WA_DeleteOnClose);//防止内存泄漏
+            dialog->setWindowTitle(tr("Set Language"));
+            dialog->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+            dialog->resize(250, 50);
+            QGridLayout *gridLayout = new QGridLayout(dialog);
+            QComboBox *qcb = new QComboBox(dialog);
+            qcb->setMinimumSize(120, 20);
+            qcb->addItems({"简体中文","English","Русский","한국어","Français"});
+            qcb->setCurrentIndex(setting->value("language", QVariant(1)).toInt());
+            connect(qcb, QOverload<int>::of(&QComboBox::currentIndexChanged), [&](){
+                setting->setValue("language", qcb->currentIndex());
+                setLanguage(qcb->currentIndex());
+                dialog->setWindowTitle(tr("Set Language"));
+                ui->retranslateUi(this);
+            });
+            gridLayout->addWidget(qcb,0,0,1,1);
+            dialog->exec();
+        }
     });
 
     cw->show();
@@ -334,13 +296,31 @@ MainWindow::MainWindow(QWidget* parent)
     connect(this->nam,SIGNAL(finished(QNetworkReply*)),this,SLOT(checkUpdateWithData(QNetworkReply*)));
     nam->get(QNetworkRequest(QUrl("https://raw.gitcode.com/weixin_61221827/lemonx-note-api/raw/main/updateapi.json")));
 
-
-    QTranslator *translator = new QTranslator;
-    translator->load(":/languages/langChinese.qm");
-    qApp->installTranslator(translator);
+    setLanguage(setting->value("language", QVariant(1)).toInt());
 };
 
-
+void MainWindow::setLanguage(int lang){
+    qApp->removeTranslator(m_pTranslator);
+    m_pTranslator = new QTranslator;
+    switch (lang) {
+    case 0:
+        m_pTranslator->load(":/languages/langChinese.qm");
+        break;
+    case 1:
+        // 默认就是英语, 不用操作
+        break;
+    case 2:
+        m_pTranslator->load(":/languages/langRussian.qm");
+        break;
+    case 3:
+        m_pTranslator->load(":/languages/langKorean.qm");
+        break;
+    case 4:
+        m_pTranslator->load(":/languages/langFrench.qm");
+        break;
+    }
+    qApp->installTranslator(m_pTranslator);
+}
 
 
 void MainWindow::closeEvent(QCloseEvent* e) {
@@ -474,6 +454,9 @@ void MainWindow::OnDrawCompleted(){
     if(cw->history.size()>50){
         cw->history.takeAt(0);
     }
+    if(cw->history.size()>1 && cw->getPagesSize()>1024*1024*20){
+        cw->history.takeAt(0);
+    }
 }
 void MainWindow::OnPageChanges(){
     ui->page->setText(QString("%1/%2").arg(cw->page+1).arg(cw->pages.size()));
@@ -573,4 +556,63 @@ void MainWindow::Eraser()
     tintButtonBackground(ui->eraser, QColor(COLOR, COLOR, COLOR));
     cw->Mode = Mode = 2;
     OnModeChange();
+}
+
+
+int compareVersions(const QString& v1, const QString& v2)
+{
+    /* 比较版本号 */
+    QVersionNumber version1 = QVersionNumber::fromString(v1);
+    QVersionNumber version2 = QVersionNumber::fromString(v2);
+
+    // 首先比较主版本号
+    if (version1.majorVersion() < version2.majorVersion())
+        return -1;
+    else if (version1.majorVersion() > version2.majorVersion())
+        return 1;
+
+    // 如果主版本号相同，则比较次版本号
+    if (version1.minorVersion() < version2.minorVersion())
+        return -1;
+    else if (version1.minorVersion() > version2.minorVersion())
+        return 1;
+
+    // 如果次版本号也相同，则比较补丁版本号
+    if (version1.microVersion() < version2.microVersion())
+        return -1;
+    else if (version1.microVersion() > version2.microVersion())
+        return 1;
+
+    return 0; // 版本号完全相同
+}
+
+
+void tintButtonBackground(QPushButton *button, const QColor &color, const QSize &padding)
+{
+    if (!button) return;
+
+    // 获取按钮的尺寸
+    QSize buttonSize = button->size();
+
+    // 加载按钮当前的图标（如果有的话）到QPixmap
+    QIcon buttonIcon = button->icon();
+    QPixmap pixmap = buttonIcon.pixmap(buttonSize);
+
+    if (pixmap.isNull()) {
+        return;
+    }
+
+    // 使用 QPainter 对象来修改pixmap，首先按比例缩放且保持图像质量
+    QPixmap scaledPixmap = pixmap.scaled(buttonSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    QPainter painter(&scaledPixmap);
+    painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    painter.fillRect(scaledPixmap.rect(), color);
+    painter.end();
+
+    // 将着色且按比例缩放后的图片设置为按钮的图标
+    QIcon coloredIcon(scaledPixmap);
+    button->setIcon(coloredIcon);
+    button->setIconSize(buttonSize - padding); // 确保图标大小与按钮匹配，尽管按比例缩放，但仍设置以覆盖所有情况
+
 }

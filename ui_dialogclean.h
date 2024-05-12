@@ -37,7 +37,7 @@ public:
         gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
         label = new QLabel(DialogClean);
         label->setObjectName(QString::fromUtf8("label"));
-        label->setStyleSheet(QString::fromUtf8("font: 14pt \"\351\273\221\344\275\223\";"));
+        label->setStyleSheet(QString::fromUtf8("font: 14pt;"));
         label->setAlignment(Qt::AlignCenter);
 
         gridLayout->addWidget(label, 1, 0, 1, 1);

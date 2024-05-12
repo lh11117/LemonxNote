@@ -28,6 +28,8 @@
 #include "appinfo.h"
 #include <QCheckBox>
 #include <QStyle>
+#include <QComboBox>
+#include <QSettings>
 
 
 QT_BEGIN_NAMESPACE
@@ -71,11 +73,16 @@ private:
     bool isUpdateDownloaded = false;
     QString update_exe_path = "", install_bat_script_path = "";
 
+    QTranslator *m_pTranslator = new QTranslator;
+
+    QSettings *setting = new QSettings("HKEY_CURRENT_USER\\Software\\LemonxNote", QSettings::NativeFormat);
+
 public slots:
     void checkUpdateWithData(QNetworkReply*);
     void OnDownloadCompleted(QNetworkReply*);
     void onSetToolbarPositon(int);
     void OnDrawCompleted();
+    void setLanguage(int);
 
 protected:
     void closeEvent(QCloseEvent*) override;
@@ -84,5 +91,7 @@ protected:
 
 int compareVersions(const QString&, const QString&);
 
+
+void tintButtonBackground(QPushButton *, const QColor &, const QSize & = QSize(20,20));
 
 #endif // MAINWINDOW_H

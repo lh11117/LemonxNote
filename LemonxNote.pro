@@ -20,19 +20,22 @@ SOURCES += \
     dialogclean.cpp \
     main.cpp \
     mainwindow.cpp \
-    save_open_lnbf.cpp
+    save_open_lnbf.cpp \
+    settingwindow.cpp
 
 HEADERS += \
     appinfo.h \
     canvaswin.h \
     dialogclean.h \
     mainwindow.h \
-    save_open_lnbf.h
+    save_open_lnbf.h \
+    settingwindow.h
 
 FORMS += \
     canvaswin.ui \
     dialogclean.ui \
-    mainwindow.ui
+    mainwindow.ui \
+    settingwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -51,7 +54,10 @@ QT += network
 QT += core
 
 TRANSLATIONS += languages/langEnglish.ts \
-                languages/langChinese.ts
+                languages/langChinese.ts \
+                languages/langRussian.ts \
+                languages/langKorean.ts \
+                languages/langFrench.ts
 
 DISTFILES += \
     res.rc

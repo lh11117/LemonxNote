@@ -7,6 +7,13 @@ DialogClean::DialogClean(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowFlags(Qt::FramelessWindowHint | windowFlags());
+    connect(ui->horizontalSlider, &QSlider::valueChanged, [=]{
+        if (ui->horizontalSlider->value() >= 97) {
+            ui->label->setText(tr("Release to clear"));
+        } else {
+            ui->label->setText(tr(">>> Swipe to clear  >>>"));
+        }
+    });
 }
 
 DialogClean::~DialogClean()

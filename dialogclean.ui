@@ -19,7 +19,7 @@
      <item row="1" column="0">
       <widget class="QLabel" name="label">
        <property name="styleSheet">
-        <string notr="true">font: 14pt &quot;黑体&quot;;</string>
+        <string notr="true">font: 14pt;</string>
        </property>
        <property name="text">
         <string>&gt;&gt;&gt; Swipe to clear  &gt;&gt;&gt;</string>
