@@ -3,6 +3,6 @@
 
 #include <QString>
 
-const QString version = "1.0.4";
+const QString version = "1.0.5";
 
 #endif // APP_INFOH

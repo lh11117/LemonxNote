@@ -30,20 +30,21 @@ public:
     QGridLayout *gridLayout_3;
     QSpacerItem *verticalSpacer_2;
     QGridLayout *gridLayout;
-    QPushButton *eraser;
-    QPushButton *pen;
-    QFrame *line_2;
-    QPushButton *save_file;
-    QPushButton *next_page;
     QPushButton *open_file;
-    QPushButton *undo;
-    QFrame *line_3;
-    QPushButton *point;
-    QPushButton *page;
+    QPushButton *settingButton;
+    QPushButton *pen;
+    QPushButton *save_file;
     QPushButton *quitButton;
     QPushButton *back_page;
     QFrame *line;
-    QPushButton *settingButton;
+    QPushButton *eraser;
+    QPushButton *undo;
+    QFrame *line_2;
+    QFrame *line_3;
+    QPushButton *page;
+    QPushButton *next_page;
+    QPushButton *point;
+    QPushButton *camera;
     QSpacerItem *verticalSpacer;
 
     void setupUi(QMainWindow *MainWindow)
@@ -67,14 +68,26 @@ public:
 
         gridLayout = new QGridLayout();
         gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
-        eraser = new QPushButton(frame);
-        eraser->setObjectName(QString::fromUtf8("eraser"));
-        eraser->setMinimumSize(QSize(70, 70));
-        eraser->setMaximumSize(QSize(70, 70));
-        eraser->setStyleSheet(QString::fromUtf8("background-color: rgba(255, 255, 255, 0);\n"
+        open_file = new QPushButton(frame);
+        open_file->setObjectName(QString::fromUtf8("open_file"));
+        open_file->setMinimumSize(QSize(70, 70));
+        open_file->setMaximumSize(QSize(70, 70));
+        open_file->setStyleSheet(QString::fromUtf8("background-color: rgba(255, 255, 255, 0);\n"
 "border: none;"));
 
-        gridLayout->addWidget(eraser, 2, 0, 1, 1);
+        gridLayout->addWidget(open_file, 6, 0, 1, 1);
+
+        settingButton = new QPushButton(frame);
+        settingButton->setObjectName(QString::fromUtf8("settingButton"));
+        settingButton->setMinimumSize(QSize(70, 70));
+        settingButton->setMaximumSize(QSize(70, 70));
+        settingButton->setStyleSheet(QString::fromUtf8("border-radius: 35px;\n"
+"padding: 5px;"));
+        QIcon icon;
+        icon.addFile(QString::fromUtf8(":/setting.png"), QSize(), QIcon::Normal, QIcon::Off);
+        settingButton->setIcon(icon);
+
+        gridLayout->addWidget(settingButton, 15, 0, 1, 1);
 
         pen = new QPushButton(frame);
         pen->setObjectName(QString::fromUtf8("pen"));
@@ -85,13 +98,6 @@ public:
 
         gridLayout->addWidget(pen, 1, 0, 1, 1);
 
-        line_2 = new QFrame(frame);
-        line_2->setObjectName(QString::fromUtf8("line_2"));
-        line_2->setFrameShape(QFrame::HLine);
-        line_2->setFrameShadow(QFrame::Sunken);
-
-        gridLayout->addWidget(line_2, 13, 0, 1, 1);
-
         save_file = new QPushButton(frame);
         save_file->setObjectName(QString::fromUtf8("save_file"));
         save_file->setMinimumSize(QSize(70, 70));
@@ -99,62 +105,7 @@ public:
         save_file->setStyleSheet(QString::fromUtf8("background-color: rgba(255, 255, 255, 0);\n"
 "border: none;"));
 
-        gridLayout->addWidget(save_file, 6, 0, 1, 1);
-
-        next_page = new QPushButton(frame);
-        next_page->setObjectName(QString::fromUtf8("next_page"));
-        next_page->setMinimumSize(QSize(70, 70));
-        next_page->setMaximumSize(QSize(70, 70));
-        next_page->setStyleSheet(QString::fromUtf8("background-color: rgba(255, 255, 255, 0);\n"
-"border: none;"));
-        QIcon icon;
-        icon.addFile(QString::fromUtf8(":/new_page.png"), QSize(), QIcon::Normal, QIcon::Off);
-        next_page->setIcon(icon);
-
-        gridLayout->addWidget(next_page, 12, 0, 1, 1);
-
-        open_file = new QPushButton(frame);
-        open_file->setObjectName(QString::fromUtf8("open_file"));
-        open_file->setMinimumSize(QSize(70, 70));
-        open_file->setMaximumSize(QSize(70, 70));
-        open_file->setStyleSheet(QString::fromUtf8("background-color: rgba(255, 255, 255, 0);\n"
-"border: none;"));
-
-        gridLayout->addWidget(open_file, 5, 0, 1, 1);
-
-        undo = new QPushButton(frame);
-        undo->setObjectName(QString::fromUtf8("undo"));
-        undo->setMinimumSize(QSize(70, 70));
-        undo->setMaximumSize(QSize(70, 70));
-        undo->setStyleSheet(QString::fromUtf8("background-color: rgba(255, 255, 255, 0);\n"
-"border: none;"));
-
-        gridLayout->addWidget(undo, 4, 0, 1, 1);
-
-        line_3 = new QFrame(frame);
-        line_3->setObjectName(QString::fromUtf8("line_3"));
-        line_3->setFrameShape(QFrame::HLine);
-        line_3->setFrameShadow(QFrame::Sunken);
-
-        gridLayout->addWidget(line_3, 3, 0, 1, 1);
-
-        point = new QPushButton(frame);
-        point->setObjectName(QString::fromUtf8("point"));
-        point->setMinimumSize(QSize(70, 70));
-        point->setMaximumSize(QSize(70, 70));
-        point->setStyleSheet(QString::fromUtf8("border-radius: 35px;\n"
-"padding: 5px;"));
-
-        gridLayout->addWidget(point, 0, 0, 1, 1);
-
-        page = new QPushButton(frame);
-        page->setObjectName(QString::fromUtf8("page"));
-        page->setMinimumSize(QSize(70, 70));
-        page->setMaximumSize(QSize(70, 70));
-        page->setStyleSheet(QString::fromUtf8("background-color: rgba(255, 255, 255, 0);\n"
-"border: none;"));
-
-        gridLayout->addWidget(page, 10, 0, 1, 1);
+        gridLayout->addWidget(save_file, 7, 0, 1, 1);
 
         quitButton = new QPushButton(frame);
         quitButton->setObjectName(QString::fromUtf8("quitButton"));
@@ -166,7 +117,7 @@ public:
         icon1.addFile(QString::fromUtf8(":/quit.png"), QSize(), QIcon::Normal, QIcon::Off);
         quitButton->setIcon(icon1);
 
-        gridLayout->addWidget(quitButton, 15, 0, 1, 1);
+        gridLayout->addWidget(quitButton, 16, 0, 1, 1);
 
         back_page = new QPushButton(frame);
         back_page->setObjectName(QString::fromUtf8("back_page"));
@@ -178,26 +129,85 @@ public:
         icon2.addFile(QString::fromUtf8(":/back_page.png"), QSize(), QIcon::Normal, QIcon::Off);
         back_page->setIcon(icon2);
 
-        gridLayout->addWidget(back_page, 9, 0, 1, 1);
+        gridLayout->addWidget(back_page, 10, 0, 1, 1);
 
         line = new QFrame(frame);
         line->setObjectName(QString::fromUtf8("line"));
         line->setFrameShape(QFrame::HLine);
         line->setFrameShadow(QFrame::Sunken);
 
-        gridLayout->addWidget(line, 7, 0, 1, 1);
+        gridLayout->addWidget(line, 8, 0, 1, 1);
 
-        settingButton = new QPushButton(frame);
-        settingButton->setObjectName(QString::fromUtf8("settingButton"));
-        settingButton->setMinimumSize(QSize(70, 70));
-        settingButton->setMaximumSize(QSize(70, 70));
-        settingButton->setStyleSheet(QString::fromUtf8("border-radius: 35px;\n"
-"padding: 5px;"));
+        eraser = new QPushButton(frame);
+        eraser->setObjectName(QString::fromUtf8("eraser"));
+        eraser->setMinimumSize(QSize(70, 70));
+        eraser->setMaximumSize(QSize(70, 70));
+        eraser->setStyleSheet(QString::fromUtf8("background-color: rgba(255, 255, 255, 0);\n"
+"border: none;"));
+
+        gridLayout->addWidget(eraser, 2, 0, 1, 1);
+
+        undo = new QPushButton(frame);
+        undo->setObjectName(QString::fromUtf8("undo"));
+        undo->setMinimumSize(QSize(70, 70));
+        undo->setMaximumSize(QSize(70, 70));
+        undo->setStyleSheet(QString::fromUtf8("background-color: rgba(255, 255, 255, 0);\n"
+"border: none;"));
+
+        gridLayout->addWidget(undo, 4, 0, 1, 1);
+
+        line_2 = new QFrame(frame);
+        line_2->setObjectName(QString::fromUtf8("line_2"));
+        line_2->setFrameShape(QFrame::HLine);
+        line_2->setFrameShadow(QFrame::Sunken);
+
+        gridLayout->addWidget(line_2, 14, 0, 1, 1);
+
+        line_3 = new QFrame(frame);
+        line_3->setObjectName(QString::fromUtf8("line_3"));
+        line_3->setFrameShape(QFrame::HLine);
+        line_3->setFrameShadow(QFrame::Sunken);
+
+        gridLayout->addWidget(line_3, 3, 0, 1, 1);
+
+        page = new QPushButton(frame);
+        page->setObjectName(QString::fromUtf8("page"));
+        page->setMinimumSize(QSize(70, 70));
+        page->setMaximumSize(QSize(70, 70));
+        page->setStyleSheet(QString::fromUtf8("background-color: rgba(255, 255, 255, 0);\n"
+"border: none;"));
+
+        gridLayout->addWidget(page, 11, 0, 1, 1);
+
+        next_page = new QPushButton(frame);
+        next_page->setObjectName(QString::fromUtf8("next_page"));
+        next_page->setMinimumSize(QSize(70, 70));
+        next_page->setMaximumSize(QSize(70, 70));
+        next_page->setStyleSheet(QString::fromUtf8("background-color: rgba(255, 255, 255, 0);\n"
+"border: none;"));
         QIcon icon3;
-        icon3.addFile(QString::fromUtf8(":/setting.png"), QSize(), QIcon::Normal, QIcon::Off);
-        settingButton->setIcon(icon3);
+        icon3.addFile(QString::fromUtf8(":/new_page.png"), QSize(), QIcon::Normal, QIcon::Off);
+        next_page->setIcon(icon3);
 
-        gridLayout->addWidget(settingButton, 14, 0, 1, 1);
+        gridLayout->addWidget(next_page, 13, 0, 1, 1);
+
+        point = new QPushButton(frame);
+        point->setObjectName(QString::fromUtf8("point"));
+        point->setMinimumSize(QSize(70, 70));
+        point->setMaximumSize(QSize(70, 70));
+        point->setStyleSheet(QString::fromUtf8("border-radius: 35px;\n"
+"padding: 5px;"));
+
+        gridLayout->addWidget(point, 0, 0, 1, 1);
+
+        camera = new QPushButton(frame);
+        camera->setObjectName(QString::fromUtf8("camera"));
+        camera->setMinimumSize(QSize(70, 70));
+        camera->setMaximumSize(QSize(70, 70));
+        camera->setStyleSheet(QString::fromUtf8("background-color: rgba(255, 255, 255, 0);\n"
+"border: none;"));
+
+        gridLayout->addWidget(camera, 5, 0, 1, 1);
 
 
         gridLayout_3->addLayout(gridLayout, 1, 0, 1, 1);
@@ -219,17 +229,18 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "MainWindow", nullptr));
-        eraser->setText(QString());
+        open_file->setText(QString());
+        settingButton->setText(QString());
         pen->setText(QString());
         save_file->setText(QString());
-        next_page->setText(QString());
-        open_file->setText(QString());
-        undo->setText(QString());
-        point->setText(QString());
-        page->setText(QCoreApplication::translate("MainWindow", "1/1", nullptr));
         quitButton->setText(QString());
         back_page->setText(QString());
-        settingButton->setText(QString());
+        eraser->setText(QString());
+        undo->setText(QString());
+        page->setText(QCoreApplication::translate("MainWindow", "1/1", nullptr));
+        next_page->setText(QString());
+        point->setText(QString());
+        camera->setText(QString());
     } // retranslateUi
 
 };

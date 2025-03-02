@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget* parent)
     qDebug()<<QDir::tempPath();
 
 
-    cw->drawColor = this->drawColor = QColor(255, 255, 255);
+    cw->drawColor = this->drawColor = QColor(255, 0, 0);
 
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool | Qt::ToolTip);//需要去掉标题栏
     this->setAttribute(Qt::WA_TranslucentBackground);
@@ -40,7 +40,42 @@ MainWindow::MainWindow(QWidget* parent)
 
 
     connect(ui->point, &QPushButton::clicked, [&] {
+        if(Mode == 0){
+            MyMenu mm;
+            QAction*tips = new QAction(QString("缩放:%1%").arg(cw->zoom()*100));
+            QAction*plus = new QAction("+");
+            QAction*minus = new QAction("-");
+            QAction*reset = new QAction("移动缩放复位");
+            QAction*close = new QAction("关闭");
+            mm.addAction(tips);
+            mm.addAction(plus);
+            mm.addAction(minus);
+            mm.addAction(reset);
+            mm.addAction(close);
+            connect(plus, &QAction::triggered, [&]{
+                cw->zoom(cw->zoom()+0.1);
+                tips->setText(QString("缩放:%1%").arg(cw->zoom()*100));
+                cw->update();
+            });
+            connect(minus, &QAction::triggered, [&]{
+                cw->zoom(cw->zoom()-0.1);
+                tips->setText(QString("缩放:%1%").arg(cw->zoom()*100));
+                cw->update();
+            });
+            connect(reset, &QAction::triggered, [&]{
+                cw->zoom(1);
+                tips->setText("缩放:100%");
+                cw->offset(QPoint(0,0));
+                cw->update();
+            });
+            connect(close, &QAction::triggered, [&]{
+                mm.close();
+            });
+            mm.exec(QCursor::pos());
+            return;
+        }
         this->Point();
+        if(!timer->isActive() && CameraId!=-1) timer->start(50);
     });
 
     connect(ui->pen, &QPushButton::clicked, [&] {
@@ -57,7 +92,7 @@ MainWindow::MainWindow(QWidget* parent)
             cn.show();
             if (cn.exec() == QDialog::Accepted) {
                 cw->history << QPair<int, Pages>{cw->page, cw->pages};
-                cw->pages.replace(cw->page, QPair<QPoint,QList<QPair<QColor, QList<QPoint>>>>{cw->pages.at(cw->page).first,{{drawColor, QList<QPoint>() }}});
+                cw->getpage()->lines = {new Line()};
                 cw->update();
                 Pen();
             }
@@ -83,8 +118,10 @@ MainWindow::MainWindow(QWidget* parent)
                 message.button(QMessageBox::Cancel)->setText(tr("Cancel"));
                 // ////////////////////
                 int result = message.exec();
-                switch(result){
-                case QMessageBox::Yes: {
+                if (result == QMessageBox::Cancel){
+                    return;
+                }
+                if (result ==QMessageBox::Yes) {
                     QFile file(lnbf_path); // 指定要写入的文件名
                     if (file.open(QIODevice::WriteOnly)) {
                         QTextStream out(&file); // 创建数据流对象
@@ -94,17 +131,13 @@ MainWindow::MainWindow(QWidget* parent)
                         // 错误处理
                     }
                 }
-                case QMessageBox::No: {
-                    this->cw->close();
-                    this->close();
-                    break;
-                }
-                }
+                this->cw->close();
+                this->close();
             } else {
                 this->cw->close();
                 this->close();
             }
-        } else if (cw->pages != Pages{{}}){
+        } else if (cw->pages.size()!=1||cw->pages.at(0)->lines.size()!=1||cw->pages.at(0)->lines.last()->points.size()!=0){
             QMessageBox message(QMessageBox::Question, tr("Tip"), tr("You will exit!") + "\n" + tr("Before that, would you like to save the blackboard file?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,this);
             message.setDefaultButton(QMessageBox::Cancel);
             message.button(QMessageBox::Yes)->setText(tr("Yes"));
@@ -112,8 +145,10 @@ MainWindow::MainWindow(QWidget* parent)
             message.button(QMessageBox::Cancel)->setText(tr("Cancel"));
             // ////////////////////
             int result = message.exec();
-            switch(result){
-            case QMessageBox::Yes: {
+            if (result == QMessageBox::Cancel){
+                return;
+            }
+            if (result ==QMessageBox::Yes) {
                 QFileDialog fileDialog;
                 QString path = fileDialog.getSaveFileName(this, tr("Save To"), ".", tr("LemonxNote Blackboard File") + "(*.lnbf)");
                 if (path=="") { return; }
@@ -125,12 +160,8 @@ MainWindow::MainWindow(QWidget* parent)
                     // 错误处理
                 }
             }
-            case QMessageBox::No: {
-                this->cw->close();
-                this->close();
-                break;
-            }
-            }
+            this->cw->close();
+            this->close();
         } else {
             this->cw->close();
             this->close();
@@ -141,7 +172,11 @@ MainWindow::MainWindow(QWidget* parent)
         cw->history<<QPair<int, Pages>{cw->page,cw->pages};
         emit cw->OnDrawCompleted();
         if(cw->pages.size()==cw->page+1) {  // 加页
-            cw->pages<< QPair<QPoint, QList<QPair<QColor, QList<QPoint>>>> {QPoint(0,0), {{drawColor, QList<QPoint>() }}};
+            Page*p = new Page;
+            p->zoom = 1.0;
+            p->offset = QPoint(0,0);
+            p->lines << new Line();
+            cw->pages<<p;
             cw->setPage(cw->page+1);
             cw->update();
             OnPageChanges();
@@ -237,6 +272,105 @@ MainWindow::MainWindow(QWidget* parent)
         }
     });
 
+    connect(ui->camera, &QPushButton::clicked, [&]{
+        if (cw->cameraPage != cw->page && CameraId != -1){
+            if (QMessageBox::critical(this, "LemonNote 警告", QString("为避免展台访问冲突, 摄像头展台只能在单个页面启动, 但是已经在第%1页启用了! \n是否断开%1页的展台连接来显示到此页?").arg(cw->cameraPage + 1), QMessageBox::Yes | QMessageBox::No)==QMessageBox::Yes){
+                cw->cameraPage = cw->page;
+            } else return;
+        }
+        MyMenu *qm = new MyMenu();
+        QList<QAction*> qlistaction = {};
+        int n = 0;
+        QAction *actionena, *turn_left, *turn_right, *qafixed, *qaclose;
+        // /////
+        actionena = new QAction("未启用");
+        actionena->setCheckable(true);
+        actionena->setChecked(CameraId == -1);
+        qm->addAction(actionena);
+        connect(actionena, &QAction::triggered, [&]{
+            for (QAction* qa: qlistaction){
+                qa->setChecked(false);
+            }
+            actionena->setChecked(true);
+            CameraId_back = CameraId;
+            CameraId = -1;
+            qafixed->setChecked(0);
+            OnCameraChange();
+        });
+        for(QCameraInfo c: cameras) {
+            QAction *action = new QAction(c.description());
+            action->setCheckable(true);
+            action->setChecked(QCameraInfo::defaultCamera().description()==c.description()&&CameraId!=-1);
+            qlistaction << action;
+            connect(action, &QAction::triggered, [&, n]{
+                for (QAction* qa: qlistaction){
+                    qa->setChecked(false);
+                }
+                qlistaction.at(n)->setChecked(true);
+                actionena->setChecked(false);
+                CameraId_back = CameraId;
+                CameraId = n;
+                qafixed->setChecked(IsCameraFixed);
+                OnCameraChange();
+            });
+            qm->addAction(action);
+            n++;
+        }
+        qm->addSeparator();
+        turn_left = new QAction("左旋转");
+        turn_right = new QAction("右旋转");
+        connect(turn_left, &QAction::triggered, [&]{
+            cw->cameraAngle = cameraAngle = fmod(cameraAngle + 90.0, 360.0);
+            if(fmod(cw->cameraAngle, 180.0)!=0.0) cw->bgSize = QSize(Camera->supportedViewfinderResolutions().last().height(), Camera->supportedViewfinderResolutions().last().width());
+            else cw->bgSize = Camera->supportedViewfinderResolutions().last();
+            qDebug()<<cw->bgSize;
+            CameraImageCapture->capture();
+        });
+        connect(turn_right, &QAction::triggered, [&]{
+            cw->cameraAngle = cameraAngle = fmod(cameraAngle - 90.0, 360.0);
+            if(fmod(cw->cameraAngle, 180.0)!=0.0) cw->bgSize = QSize(Camera->supportedViewfinderResolutions().last().height(), Camera->supportedViewfinderResolutions().last().width());
+            else cw->bgSize = Camera->supportedViewfinderResolutions().last();
+            qDebug()<<cw->bgSize;
+            CameraImageCapture->capture();
+        });
+        qm->addAction(turn_left);
+        qm->addAction(turn_right);
+        qm->addSeparator();
+        qafixed = new QAction("定格");
+        qafixed->setCheckable(true);
+        qafixed->setChecked(IsCameraFixed && CameraId != -1);
+        qafixed->setEnabled(CameraId != -1);
+        connect(qafixed, &QAction::triggered, [&]{
+            if(CameraId == -1) {
+                qafixed->setChecked(0);
+                return;
+            }
+            IsCameraFixed = qafixed->isChecked();
+            if(IsCameraFixed)
+                timer->stop();
+            else
+                timer->start(50);
+        });
+        qm->addAction(qafixed);
+        qm->addSeparator();
+        // ///////////
+        qaclose = new QAction(
+                            setIconColor(QIcon(":/quit.png"),
+                                         QColor(255, 0, 0)),
+                            "关闭菜单");
+        connect(qaclose, &QAction::triggered, [&]{
+            qm->close();
+        });
+        qm->addAction(qaclose);
+        if (CameraId != -1) {
+            for (QAction* qa: qlistaction){
+                qa->setChecked(false);
+            }
+            qlistaction.at(CameraId)->setChecked(true);
+        }
+        qm->exec(QCursor::pos());
+    });
+
     connect(ui->settingButton, &QPushButton::clicked, [&]{
         QMessageBox *msg = new QMessageBox(this);
         msg->setStandardButtons(QMessageBox::Ok | QMessageBox::Yes);
@@ -245,10 +379,12 @@ MainWindow::MainWindow(QWidget* parent)
         msg->setText(QString(tr("LemonxNote Version: ") + "v%1\n" +
                              tr("Is Qt supported by OpenSSL? ") + " %2\n" +
                              tr("Required OpenSSL version: ") + "%3\n" +
-                             tr("Memory footprint: ") + "%4").arg(version)
+                             tr("Memory footprint: ") + "%4\n" +
+                             tr("Build time: ") + "%5 %6").arg(version)
                                                              .arg(QSslSocket::supportsSsl())
                                                              .arg(QSslSocket::sslLibraryBuildVersionString())
-                                                             .arg(format_bytes(cw->getPagesSize())));
+                                                             .arg(format_bytes(cw->getPagesSize()))
+                                                             .arg(__DATE__).arg(__TIME__));
         msg->button(QMessageBox::Yes)->setText(tr("Yes"));
         msg->button(QMessageBox::Ok)->setText("  " + tr("Set Language") + "  ");
         QCheckBox *cb = new QCheckBox(msg);
@@ -287,9 +423,14 @@ MainWindow::MainWindow(QWidget* parent)
         }
     });
 
+    connect(timer, &QTimer::timeout, [&]{
+        CameraImageCapture->capture();
+    });
+
     cw->show();
 
     this->Pen();
+    OnCameraChange();
 
 
 
@@ -298,6 +439,78 @@ MainWindow::MainWindow(QWidget* parent)
 
     setLanguage(setting->value("language", QVariant(1)).toInt());
 };
+
+void MainWindow::OnCameraChange() {
+    ui->camera->setIcon(QIcon(":/camera.png"));
+    QString qss = "background-color: rgba(0, 0, 0, 50);"
+            "border-radius: 35px;"
+            "padding: 5px;";
+    ui->camera->setStyleSheet(qss);;
+    cw->isThereBG = CameraId != -1;
+    if (Camera!=nullptr && CameraId!=CameraId_back)
+    {Camera->stop();cw->bgPixmap = new QPixmap();}
+    if (CameraId == -1) {
+        tintButtonBackground(ui->camera, QColor(COLOR, COLOR, COLOR, ALPHA));
+        timer->stop();
+    } else {
+        tintButtonBackground(ui->camera, QColor(COLOR, COLOR, COLOR));
+        // 摄像头初始化
+        //获取到要打开的设备的名称
+        QCameraInfo CameraInfo = cameras.at(CameraId);
+        //创建摄像头对象
+        Camera = new QCamera(CameraInfo);
+        //创建取景器并将其附在要显示的区域
+        Camera->start();
+        //调整摄像头数据显示的大小
+        QList<QSize> infos = Camera->supportedViewfinderResolutions();
+        //qDebug() << infos;
+        QSize size = infos.at(infos.size()-1);
+        cw->bgSize = size;
+        //CameraViewFinder->resize(size*cw->zoom);
+        //cw->CameraLabel->resize(size*cw->zoom);
+        //cw->CameraLabel->move(cw->zoom*QPoint(-size.width() + cw->width(), -size.height() + cw->height())/2);
+        //显示摄像头取景器
+        //开启摄像头
+        //创建获取一帧数据对象
+        CameraImageCapture = new QCameraImageCapture(Camera);
+        CameraImageCapture->setCaptureDestination(QCameraImageCapture::CaptureToBuffer);
+        CameraImageCapture->setBufferFormat(QVideoFrame::PixelFormat::Format_Jpeg);
+        //关联图像获取信号
+        connect(CameraImageCapture, &QCameraImageCapture::imageCaptured, this, &MainWindow::take_photo);
+        CameraImageCapture->capture();
+        if(!timer->isActive()) timer->start(50);
+        cw->cameraPage = cw->page;
+    }
+}
+
+/*void MainWindow::take_photo(int, const QImage &img) {
+    QImage image;
+
+    try {
+        QMatrix matrix;
+        if (qIsNaN(camereAngle) || qIsInf(camereAngle)) {
+            qDebug() << "Invalid camera angle: " << camereAngle;
+            return;
+        }
+        matrix.rotate(camereAngle);
+        qDebug()<<matrix<<img;
+        image = img.transformed(matrix, Qt::FastTransformation);
+    } catch (const char *err) {
+        qDebug() << "Rotation error: " << err;
+        return;
+    }
+
+    cw->bgPixmap = new QPixmap(QPixmap::fromImage(image));
+}*/
+
+void MainWindow::take_photo(int, const QImage &origImg) {
+    //QTransform transform;
+    //transform.rotate(cameraAngle);
+
+    //QImage rotatedImg = origImg.transformed(transform, Qt::SmoothTransformation);
+
+    cw->bgPixmap = new QPixmap(QPixmap::fromImage(origImg));
+}
 
 void MainWindow::setLanguage(int lang){
     qApp->removeTranslator(m_pTranslator);
@@ -416,6 +629,30 @@ void MainWindow::onSetToolbarPositon(int left_or_right){
     }
 }
 
+//有问题
+//void MainWindow::removeHistory(int pos){
+//    if (pos < 0 || pos >= cw->history.size()) {
+//        // pos 超出范围，返回或处理错误
+//        return;
+//    }
+//    Pages r=cw->history.takeAt(pos).second;
+//    for(Page *p:r){
+//        if (p) {
+//            for(Line*l:p->lines){
+//                if (l) {
+//                    for(QPoint*qp:l->points){
+//                        if (qp) {
+//                            delete qp;
+//                        }
+//                    }
+//                    delete l;
+//                }
+//            }
+//            delete p;
+//        }
+//    }
+//}
+
 void MainWindow::OnDrawCompleted(){
     cw->update();
     //qDebug()<<"Page histories: "<<cw->history.size();
@@ -451,6 +688,7 @@ void MainWindow::OnDrawCompleted(){
             tintButtonBackground(ui->save_file, QColor(COLOR, COLOR, COLOR), QSize(30,30));
         }
     }
+    qDebug()<<"size:"<<cw->history.size();
     if(cw->history.size()>50){
         cw->history.takeAt(0);
     }
@@ -614,5 +852,64 @@ void tintButtonBackground(QPushButton *button, const QColor &color, const QSize 
     QIcon coloredIcon(scaledPixmap);
     button->setIcon(coloredIcon);
     button->setIconSize(buttonSize - padding); // 确保图标大小与按钮匹配，尽管按比例缩放，但仍设置以覆盖所有情况
+}
 
+
+QIcon addShadowToIcon(const QString &filePath, const QColor &shadowColor)
+{
+    // 读取PNG图像
+    QPixmap originalPixmap(filePath);
+    if (originalPixmap.isNull()) {
+        qWarning("Failed to load PNG image: %s", qPrintable(filePath));
+        return QIcon();
+    }
+
+    // 计算阴影图像大小
+    int shadowRadius = 3; // 阴影半径基础值
+    QSize shadowSize = originalPixmap.size() + QSize(shadowRadius * 4, shadowRadius * 4);
+
+    // 创建阴影图像
+    QPixmap shadowPixmap(shadowSize);
+    shadowPixmap.fill(Qt::transparent);
+    QPainter painter(&shadowPixmap);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+
+    // 绘制原始图像和阴影
+    for (int x = 0; x < originalPixmap.width(); ++x) {
+        for (int y = 0; y < originalPixmap.height(); ++y) {
+            QRgb pixel = originalPixmap.toImage().pixel(x, y);
+            int alpha = qAlpha(pixel);
+            if (alpha > 0) {
+                int radius = shadowRadius + (alpha / 255.0) * shadowRadius;
+                QRadialGradient gradient(x + shadowRadius * 2, y + shadowRadius * 2, radius);
+                gradient.setColorAt(0.0, shadowColor);
+                gradient.setColorAt(0.2, QColor(shadowColor.red(), shadowColor.green(), shadowColor.blue(), 192));
+                gradient.setColorAt(0.4, QColor(shadowColor.red(), shadowColor.green(), shadowColor.blue(), 128));
+                gradient.setColorAt(0.6, QColor(shadowColor.red(), shadowColor.green(), shadowColor.blue(), 64));
+                gradient.setColorAt(0.8, QColor(shadowColor.red(), shadowColor.green(), shadowColor.blue(), 32));
+                gradient.setColorAt(1.0, Qt::transparent);
+                painter.setBrush(gradient);
+                painter.drawRect(x + shadowRadius * 2 - radius, y + shadowRadius * 2 - radius, radius * 2, radius * 2);
+            }
+        }
+    }
+    painter.drawPixmap(shadowRadius * 2, shadowRadius * 2, originalPixmap);
+
+    // 转换为QIcon
+    QIcon icon(shadowPixmap);
+    return icon;
+}
+
+QIcon MainWindow::ShadowIcon(QString qs) {
+    return addShadowToIcon(qs, QColor(0, 0, 0));
+}
+
+QIcon MainWindow::setIconColor(QIcon icon, QColor color)
+{
+    QPixmap pixmap = icon.pixmap(QSize(64,64));
+    QPainter painter(&pixmap);
+    painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    painter.fillRect(pixmap.rect(), color);
+    QIcon colorIcon = QIcon(pixmap);
+    return colorIcon;
 }

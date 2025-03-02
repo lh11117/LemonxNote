@@ -14,7 +14,9 @@
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QLabel>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QSlider>
+#include <QtWidgets/QSpacerItem>
 
 QT_BEGIN_NAMESPACE
 
@@ -24,7 +26,10 @@ public:
     QGridLayout *gridLayout_2;
     QGridLayout *gridLayout;
     QLabel *label;
+    QSpacerItem *horizontalSpacer;
+    QSpacerItem *horizontalSpacer_2;
     QSlider *horizontalSlider;
+    QPushButton *cancel;
 
     void setupUi(QDialog *DialogClean)
     {
@@ -40,7 +45,15 @@ public:
         label->setStyleSheet(QString::fromUtf8("font: 14pt;"));
         label->setAlignment(Qt::AlignCenter);
 
-        gridLayout->addWidget(label, 1, 0, 1, 1);
+        gridLayout->addWidget(label, 1, 1, 1, 1);
+
+        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        gridLayout->addItem(horizontalSpacer, 1, 3, 1, 1);
+
+        horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        gridLayout->addItem(horizontalSpacer_2, 1, 0, 1, 1);
 
         horizontalSlider = new QSlider(DialogClean);
         horizontalSlider->setObjectName(QString::fromUtf8("horizontalSlider"));
@@ -71,7 +84,12 @@ public:
         horizontalSlider->setPageStep(0);
         horizontalSlider->setOrientation(Qt::Horizontal);
 
-        gridLayout->addWidget(horizontalSlider, 0, 0, 1, 1);
+        gridLayout->addWidget(horizontalSlider, 0, 0, 1, 5);
+
+        cancel = new QPushButton(DialogClean);
+        cancel->setObjectName(QString::fromUtf8("cancel"));
+
+        gridLayout->addWidget(cancel, 1, 2, 1, 1);
 
 
         gridLayout_2->addLayout(gridLayout, 0, 0, 1, 1);
@@ -86,6 +104,7 @@ public:
     {
         DialogClean->setWindowTitle(QCoreApplication::translate("DialogClean", "Dialog", nullptr));
         label->setText(QCoreApplication::translate("DialogClean", ">>> Swipe to clear  >>>", nullptr));
+        cancel->setText(QString());
     } // retranslateUi
 
 };

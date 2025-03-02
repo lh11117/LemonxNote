@@ -2,6 +2,8 @@
 #define DIALOGCLEAN_H
 
 #include <QDialog>
+#include <QPushButton>
+#include <QStyle>
 
 #include "canvaswin.h"
 namespace Ui {

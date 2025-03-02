@@ -7,12 +7,16 @@ DialogClean::DialogClean(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowFlags(Qt::FramelessWindowHint | windowFlags());
+    ui->cancel->setIcon(QApplication::style()->standardIcon(QStyle::SP_DialogCancelButton));
     connect(ui->horizontalSlider, &QSlider::valueChanged, [=]{
         if (ui->horizontalSlider->value() >= 97) {
             ui->label->setText(tr("Release to clear"));
         } else {
             ui->label->setText(tr(">>> Swipe to clear  >>>"));
         }
+    });
+    connect(ui->cancel, &QPushButton::clicked, [=]{
+        this->close();
     });
 }
 

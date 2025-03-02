@@ -17,5 +17,7 @@
         <file>languages/langFrench.qm</file>
         <file>languages/langKorean.qm</file>
         <file>languages/langRussian.qm</file>
+        <file>camera.png</file>
+        <file>choose.png</file>
     </qresource>
 </RCC>

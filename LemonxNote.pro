@@ -66,3 +66,7 @@ RC_ICONS = "lemonxnote.ico"
 
 
 QT+=xml
+
+QT += multimedia
+QT += multimediawidgets
+

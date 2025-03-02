@@ -19,8 +19,8 @@
   <widget class="QLabel" name="labelTime">
    <property name="geometry">
     <rect>
-     <x>300</x>
-     <y>0</y>
+     <x>290</x>
+     <y>10</y>
      <width>301</width>
      <height>141</height>
     </rect>
@@ -39,8 +39,8 @@ color: rgb(255, 255, 255);</string>
   <widget class="QLabel" name="labelTips">
    <property name="geometry">
     <rect>
-     <x>110</x>
-     <y>210</y>
+     <x>90</x>
+     <y>60</y>
      <width>281</width>
      <height>111</height>
     </rect>
@@ -59,6 +59,22 @@ padding: 25px;</string>
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
+  <widget class="QLabel" name="CanvasWidget">
+   <property name="geometry">
+    <rect>
+     <x>340</x>
+     <y>250</y>
+     <width>161</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <zorder>CanvasWidget</zorder>
+  <zorder>labelTime</zorder>
+  <zorder>labelTips</zorder>
  </widget>
  <resources/>
  <connections/>
